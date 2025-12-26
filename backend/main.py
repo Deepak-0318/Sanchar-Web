@@ -10,7 +10,15 @@ from store import save_plan, get_plan
 # ----------------------------------
 # Config
 # ----------------------------------
-FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL", "http://localhost:5173")
+FRONTEND_BASE_URL = os.getenv(
+    "FRONTEND_BASE_URL",
+    "http://localhost:5173"
+)
+
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://sancharweb.vercel.app",
+]
 
 # ----------------------------------
 # App Init
@@ -19,7 +27,7 @@ app = FastAPI(title="Sanchar AI")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # safe for MVP
+    allow_origins=ALLOWED_ORIGINS,   # ✅ IMPORTANT FIX
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

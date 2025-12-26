@@ -1,4 +1,6 @@
-import { API_BASE_URL } from "./config";
+// src/legacyapi.js
+
+const API_BASE_URL = "https://sanchar-web.onrender.com";
 
 export async function generatePlan(payload) {
   const response = await fetch(`${API_BASE_URL}/generate-plan`, {
@@ -10,6 +12,8 @@ export async function generatePlan(payload) {
   });
 
   if (!response.ok) {
+    const text = await response.text();
+    console.error("Backend error:", text);
     throw new Error("Failed to generate plan");
   }
 

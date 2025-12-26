@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "../config";
+const API_BASE_URL = "https://sanchar-web.onrender.com";
 
 export const fetchHiddenGems = async ({ lat, lon, radiusKm = 5 }) => {
   const url = `${API_BASE_URL}/places/hidden/explore?lat=${lat}&lon=${lon}&radius_km=${radiusKm}`;
