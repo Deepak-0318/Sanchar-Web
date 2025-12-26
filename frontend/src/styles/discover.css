@@ -1,0 +1,73 @@
+.discover-page {
+  padding: 24px;
+}
+
+.explore-btn {
+  padding: 10px 16px;
+  margin: 12px 0;
+  cursor: pointer;
+}
+
+.cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.gem-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.gem-card h3 {
+  margin: 0 0 6px;
+}
+
+.area {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.famous-for {
+  margin: 8px 0;
+  font-size: 0.95rem;
+}
+
+.meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.explore-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+
+.explore-controls input,
+.explore-controls select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 200px;
+}
+
+.explore-controls button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background: #000;
+  color: #fff;
+  cursor: pointer;
+}
+
+.error {
+  color: #ff6b6b;
+  margin-top: 10px;
+}
