@@ -3,8 +3,6 @@ import os
 from math import radians, sin, cos, sqrt, atan2
 import pandas as pd
 
-# --------- Agent-2 helpers ----------
-
 MOOD_TAG_MAP = {
     "chill": ["solo", "couple", "family", "nature", "park", "lake"],
     "fun": ["friends", "adventure"],
@@ -27,22 +25,13 @@ def vibe_match(row, vibe_keywords):
     tags = safe_list(row.get("tags", []))
     category = str(row.get("category", "")).lower()
 
-    expanded_keywords = []
+    expanded = []
     for v in vibe_keywords:
-        expanded_keywords.extend(MOOD_TAG_MAP.get(v, [v]))
+        expanded.extend(MOOD_TAG_MAP.get(v, [v]))
 
     tags_lower = [t.lower() for t in tags]
 
-    return any(
-        kw in tags_lower or kw in category
-        for kw in expanded_keywords
-    )
-
-def weather_ok(row):
-    weather = safe_list(row.get("weather_suitability", []))
-    return any(w in ["clear", "cloudy", "all"] for w in weather)
-
-# --------- Agent-3 helpers ----------
+    return any(k in tags_lower or k in category for k in expanded)
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371
@@ -65,10 +54,21 @@ CATEGORY_TIME_MAP = {
 def estimate_visit_time(category):
     return CATEGORY_TIME_MAP.get(category, 1.5)
 
-# --------- DATA LOADER (Feature-2 uses this) ----------
-
 def load_places_data():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(base_dir, "data", "places_final_ai_ready.csv")
     df = pd.read_csv(csv_path)
     return df.to_dict(orient="records")
+
+def weather_score(row, current_weather):
+    suitability = safe_list(row.get("weather_suitability", []))
+    suitability = [s.lower() for s in suitability]
+
+    if current_weather in suitability:
+        return 1.0
+    if "all" in suitability:
+        return 0.8
+    if current_weather == "rainy" and any("indoor" in s for s in suitability):
+        return 0.9
+
+    return 0.4

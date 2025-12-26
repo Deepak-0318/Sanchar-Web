@@ -14,21 +14,16 @@ def explore_hidden_gems(
     category: str | None = None
 ):
     places = load_places_data()
-
     results = []
 
     for p in places:
-        # --- hidden gem check ---
         is_hidden = str(p.get("is_hidden_gem", "")).strip().lower()
         if is_hidden not in ["true", "1", "yes", "y"]:
             continue
 
-        # --- category filter ---
-        if category:
-            if category.lower() not in str(p.get("category", "")).lower():
-                continue
+        if category and category.lower() not in str(p.get("category", "")).lower():
+            continue
 
-        # --- distance calculation ---
         try:
             dist = haversine(
                 lat,
@@ -40,10 +35,10 @@ def explore_hidden_gems(
             continue
 
         if dist <= radius_km:
-            p["distance_km"] = round(dist, 2)
-            results.append(p)
+            item = dict(p)
+            item["distance_km"] = round(dist, 2)
+            results.append(item)
 
-    # --- ORDERING ---
     results.sort(
         key=lambda x: (x["distance_km"], -float(x.get("popularity_score", 0)))
     )
