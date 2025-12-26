@@ -1,5 +1,7 @@
+import { API_BASE_URL } from "../config";
+
 export const fetchHiddenGems = async ({ lat, lon, radiusKm = 5 }) => {
-  const url = `https://sanchar-api.onrender.com/places/hidden/explore?lat=${lat}&lon=${lon}&radius_km=${radiusKm}`;
+  const url = `${API_BASE_URL}/places/hidden/explore?lat=${lat}&lon=${lon}&radius_km=${radiusKm}`;
 
   const res = await fetch(url);
   if (!res.ok) {
