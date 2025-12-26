@@ -1,7 +1,7 @@
 // src/legacyapi.js
 
 export async function generatePlan(payload) {
-  const response = await fetch("http://127.0.0.1:8000/generate-plan", {
+  const response = await fetch("https://sanchar-api.onrender.com/generate-plan", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

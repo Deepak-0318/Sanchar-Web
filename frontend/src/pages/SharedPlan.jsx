@@ -7,7 +7,7 @@ export default function SharedPlan() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch(`http://127.0.0.1:8000/plan/${planId}`)
+    fetch(`https://sanchar-api.onrender.com/plan/${planId}`)
       .then((res) => res.json())
       .then((data) => {
         if (data.error) {
