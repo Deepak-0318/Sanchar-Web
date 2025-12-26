@@ -7,11 +7,13 @@ import HiddenGems from "./pages/HiddenGems";
 function App() {
   const [mode, setMode] = useState("planner");
 
+  // Planner inputs
   const [mood, setMood] = useState("chill");
   const [budget, setBudget] = useState(800);
   const [timeAvailable, setTimeAvailable] = useState("2-4 hours");
   const [startLocation, setStartLocation] = useState("Indiranagar");
 
+  // Result state
   const [planResponse, setPlanResponse] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -26,6 +28,7 @@ function App() {
   const generate = async () => {
     setLoading(true);
     setError("");
+    setPlanResponse(null);
 
     try {
       const coords = await geocodeLocation(startLocation);
@@ -49,15 +52,15 @@ function App() {
       });
     } catch (e) {
       console.error(e);
-      setError("Unable to generate plan.");
+      setError("Unable to generate plan. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const vote = (i) => {
+  const vote = (index) => {
     const updated = [...pollSlots];
-    updated[i].votes += 1;
+    updated[index].votes += 1;
     setPollSlots(updated);
   };
 
@@ -88,7 +91,7 @@ function App() {
             <input
               type="number"
               value={budget}
-              onChange={(e) => setBudget(+e.target.value)}
+              onChange={(e) => setBudget(Number(e.target.value))}
             />
 
             <select
@@ -130,7 +133,7 @@ function App() {
                 </div>
               ))}
 
-              {/* Feature-3: Share Plan */}
+              {/* Feature-3: Shareable Plan */}
               <button
                 onClick={() =>
                   navigator.clipboard.writeText(planResponse.share_url)
@@ -164,9 +167,34 @@ function App() {
 export default App;
 
 const styles = {
-  container: { padding: 20, color: "#fff", background: "#121212" },
-  form: { display: "flex", gap: 10, flexWrap: "wrap" },
-  card: { border: "1px solid #333", padding: 10, marginTop: 8 },
-  poll: { marginTop: 20, padding: 10, border: "1px solid #333" },
-  tabs: { display: "flex", gap: 10 },
+  container: {
+    padding: 20,
+    color: "#fff",
+    background: "#121212",
+    minHeight: "100vh",
+  },
+  form: {
+    display: "flex",
+    gap: 10,
+    flexWrap: "wrap",
+    marginBottom: 12,
+  },
+  card: {
+    border: "1px solid #333",
+    padding: 10,
+    marginTop: 8,
+    borderRadius: 6,
+    background: "#1c1c1c",
+  },
+  poll: {
+    marginTop: 20,
+    padding: 10,
+    border: "1px solid #333",
+    borderRadius: 6,
+  },
+  tabs: {
+    display: "flex",
+    gap: 10,
+    marginBottom: 12,
+  },
 };

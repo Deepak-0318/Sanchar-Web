@@ -1,7 +1,9 @@
 // src/legacyapi.js
 
+const API_BASE = "https://sanchar-api.onrender.com";
+
 export async function generatePlan(payload) {
-  const response = await fetch("https://sanchar-api.onrender.com/generate-plan", {
+  const response = await fetch(`${API_BASE}/generate-plan`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -10,7 +12,8 @@ export async function generatePlan(payload) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to generate plan");
+    const text = await response.text();
+    throw new Error(`Failed to generate plan: ${text}`);
   }
 
   return response.json();
