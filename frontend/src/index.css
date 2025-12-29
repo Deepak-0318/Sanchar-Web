@@ -53,9 +53,34 @@ a:hover { opacity: 0.9; }
 .title { font-size:1.6rem; margin:0; }
 .subtitle { color:var(--muted); margin:0; font-size:0.9rem }
 
-.tabs { display:flex; gap:8px; margin: 12px 0 18px; }
-.tab-btn { background: transparent; color:var(--muted); border: none; padding:8px 12px; border-radius:10px; cursor:pointer; }
-.tab-btn.active { background: var(--glass); color:var(--accent); font-weight:600; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2); }
+.tabs {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 32px;
+}
+
+.planner-tabs {
+  margin-bottom: 40px;
+}
+
+.tab-btn {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 14px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 1.05rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: var(--glass);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
+}
 
 .planner-form { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
 .planner-form .form-control { padding:10px 12px; border-radius:10px; background:transparent; border:1px solid rgba(255,255,255,0.04); color:inherit; min-width:160px; }

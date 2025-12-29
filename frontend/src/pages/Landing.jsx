@@ -1,11 +1,12 @@
+import { Link } from "react-router-dom";
 import Hero from "../components/Hero";
 import FeatureCarousel from "../components/FeatureCarousel";
 import FeatureChoices from "../components/FeatureChoices";
 
-export default function Landing({ onGetStarted }) {
+export default function Landing() {
   return (
     <main className="landing">
-      <Hero onPrimaryClick={onGetStarted} />
+      <Hero onPrimaryClick={() => {}} />
 
       <section className="features-spot">
         <h2>What Sanchar AI does</h2>

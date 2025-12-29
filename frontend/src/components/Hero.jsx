@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import heroIllustration from "../assets/hero-illustration.JPG";
 
-export default function Hero({ onPrimaryClick }) {
+export default function Hero() {
   return (
     <section
       className="hero"
@@ -27,15 +28,12 @@ export default function Hero({ onPrimaryClick }) {
             <p className="hero-tag">Plan less. Wander more.</p>
 
             <div className="hero-cta">
-              <button className="cta primary" onClick={onPrimaryClick}>
+              <Link to="/planner" className="cta primary" style={{ textDecoration: "none", display: "inline-block" }}>
                 Get Started
-              </button>
-              <button
-                className="cta ghost"
-                onClick={() => document.getElementById("planner-section").scrollIntoView({ behavior: "smooth" })}
-              >
+              </Link>
+              <Link to="/planner" className="cta ghost" style={{ textDecoration: "none", display: "inline-block" }}>
                 Open Planner
-              </button>
+              </Link>
             </div>
           </div>
         </motion.div>
