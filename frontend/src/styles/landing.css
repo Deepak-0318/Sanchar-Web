@@ -1,0 +1,283 @@
+/* Landing and hero styles */
+.landing { padding: 0; }
+
+/* Full-screen hero */
+.hero {
+  min-height: 100vh;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3,7,17,0.7), rgba(3,6,12,0.6));
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 20px;
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  max-width: 560px;
+}
+
+.hero-title { font-size: 3.2rem; margin:0; letter-spacing: -0.02em; font-weight:700 }
+.hero-tag { margin: 8px 0 18px; color: var(--muted); font-size:1.05rem; max-width:640px }
+.hero-cta { display:flex; gap:8px; margin-top:12px }
+.cta { padding:10px 14px; border-radius:10px; border:none; cursor:pointer }
+.cta.primary { background: linear-gradient(90deg,var(--accent), #5eead4); color:#041018; font-weight:700 }
+.cta.ghost { background: transparent; color: var(--muted); border:1px solid rgba(255,255,255,0.04) }
+
+.accent { color: var(--accent); }
+
+/* Hero illustration no longer behaves like a card; keep soft styling only if used elsewhere */
+.hero-illustration {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.features-spot {
+  padding: 32px 32px 48px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.feature-carousel {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.feature-card {
+  width: 100%;
+  max-width: none;
+  padding: 28px 32px;
+  border-radius: 16px;
+  min-height: 220px;
+  background: linear-gradient(180deg, rgba(15,23,42,0.9), rgba(15,23,42,0.8));
+  border: 1px solid rgba(255,255,255,0.05);
+  box-shadow: 0 14px 40px rgba(2,6,23,0.6);
+}
+
+.feature-image {
+  width: 68px;
+  height: 68px;
+  display: block;
+  margin-bottom: 14px;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.feature-card h3 {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+}
+.feature-dots { display:flex; gap:8px }
+.feature-dots .dot { width:10px; height:10px; border-radius:50%; background: rgba(255,255,255,0.06); border:none; cursor:pointer }
+.feature-dots .dot.active { background: var(--accent); box-shadow:0 4px 12px rgba(124,92,255,0.15) }
+
+.planner-section {
+  padding: 40px 16px 32px;
+  background: transparent;
+}
+
+.planner-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.spinner-wrap { display:flex; align-items:center; gap:10px }
+.spinner { width:28px; height:28px; border-radius:6px; background: linear-gradient(90deg,var(--accent), #5eead4) }
+.spinner-label { color: var(--muted) }
+
+/* small screens first */
+@media (max-width: 640px) {
+  .hero-inner { padding: 28px 16px }
+  .hero-content {
+    align-items: center;
+    text-align: center;
+  }
+  .hero-title { font-size: 1.8rem }
+  .feature-card { padding:14px }
+}
+
+/* Planner card polish */
+.planner-card {
+  padding: 28px 32px 26px;
+  border-radius: 18px;
+  background: radial-gradient(circle at top left, rgba(45,212,191,0.10), transparent 55%),
+              linear-gradient(180deg, rgba(15,23,42,0.98), rgba(15,23,42,0.9));
+  border: 1px solid rgba(148,163,184,0.25);
+  box-shadow: 0 22px 50px rgba(15,23,42,0.95);
+  min-height: 260px;
+}
+
+.planner-header h2 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+}
+
+.planner-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: center;
+  margin-top: 18px;
+}
+.input-with-icon { display:flex; align-items:center; gap:8px }
+.input-with-icon .icon { width:36px; height:36px; display:inline-grid; place-items:center; border-radius:8px; background: rgba(255,255,255,0.03); font-size:18px }
+.input-with-icon.full { grid-column: 1 / -1 }
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-start;
+  margin-top: 4px;
+}
+.cta.primary { padding: 10px 16px; border-radius:10px; font-weight:700 }
+.cta.ghost { padding: 10px 14px; border-radius:10px }
+
+@media (max-width: 720px) {
+  .planner-grid { grid-template-columns: 1fr; }
+  .input-with-icon .icon { width:40px; height:40px }
+  .planner-card { padding: 22px 18px 20px; border-radius: 16px; }
+}
+
+/* Results section styling */
+.results-section {
+  margin-top: 20px;
+  padding: 18px 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.01);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+.results-inner { max-width: 980px; margin: 0 auto; }
+.section-title { margin: 0 0 6px; font-size: 1.25rem }
+.section-subtitle { margin: 0 0 12px; color: var(--muted); }
+.results-content { margin-top: 6px }
+
+@media (max-width: 720px) {
+  .results-section { padding: 14px }
+  .section-title { font-size: 1.05rem }
+}
+
+/* Plan card header, badge and meta */
+.plan-card-header h3 { margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 10px; }
+
+.badge {
+  margin-left: 10px;
+  display: inline-block;
+  background: linear-gradient(90deg, rgba(124,92,255,0.14), rgba(94,234,212,0.06));
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.plan-meta { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: var(--muted); font-size: 0.95rem }
+
+@media (max-width: 720px) {
+  .plan-meta { flex-direction: column; gap: 6px; }
+}
+
+/* Feature choices row under carousel */
+.feature-choices {
+  padding: 8px 32px 40px;
+}
+
+.choices-inner {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.choices-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  justify-items: center;
+}
+
+.choice-card {
+  position: relative;
+  width: 100%;
+  max-width: 260px;
+  min-height: 170px;
+  padding: 18px 18px 20px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.7);
+  overflow: hidden;
+  text-align: left;
+}
+
+.choice-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.6));
+}
+
+.choice-body {
+  position: relative;
+  z-index: 1;
+}
+
+.choice-body h4 {
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+
+.choice-body p {
+  margin: 0;
+}
+
+/* Choice image sizing (used only if we show inline thumbnails elsewhere) */
+.choice-image { width:48px; height:48px; object-fit:cover }
+
+@media (max-width: 960px) {
+  .choices-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .feature-choices {
+    padding: 8px 16px 32px;
+  }
+  .choices-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .choice-card {
+    max-width: none;
+    min-height: 150px;
+  }
+}
+

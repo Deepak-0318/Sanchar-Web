@@ -3,6 +3,10 @@ import { generatePlan } from "./legacyapi";
 import { geocodeLocation } from "./geocode";
 import { getCurrentWeather } from "./services/weatherApi";
 import HiddenGems from "./pages/HiddenGems";
+import Landing from "./pages/Landing";
+import PlannerSection from "./components/PlannerSection";
+import LoadingSpinner from "./components/LoadingSpinner";
+import "./styles/landing.css";
 
 function App() {
   const [mode, setMode] = useState("planner");
@@ -69,98 +73,109 @@ function App() {
   );
 
   return (
-    <div style={styles.container}>
-      <h1>Sanchar AI</h1>
+    <>
+      {/* Full-screen landing hero sits outside the app card container */}
+      <Landing onGetStarted={() => document.getElementById("planner-section")?.scrollIntoView({ behavior: "smooth" })} />
 
-      <div style={styles.tabs}>
-        <button onClick={() => setMode("planner")}>🗓 Planner</button>
-        <button onClick={() => setMode("hidden")}>⭐ Hidden Gems</button>
-      </div>
+      <div className="app-container">
+        <div className="tabs">
+        <button
+          className={`tab-btn ${mode === "planner" ? "active" : ""}`}
+          onClick={() => setMode("planner")}
+        >
+          🗓 Planner
+        </button>
+        <button
+          className={`tab-btn ${mode === "hidden" ? "active" : ""}`}
+          onClick={() => setMode("hidden")}
+        >
+          ⭐ Hidden Gems
+        </button>
+        </div>
 
-      {mode === "hidden" && <HiddenGems />}
+        {mode === "hidden" && <HiddenGems />}
 
-      {mode === "planner" && (
-        <>
-          <div style={styles.form}>
-            <select value={mood} onChange={(e) => setMood(e.target.value)}>
-              <option value="chill">Chill</option>
-              <option value="fun">Fun</option>
-              <option value="romantic">Romantic</option>
-            </select>
+        {mode === "planner" && (
+          <>
+            <PlannerSection
+            mood={mood}
+            setMood={setMood}
+            budget={budget}
+            setBudget={setBudget}
+            timeAvailable={timeAvailable}
+            setTimeAvailable={setTimeAvailable}
+            startLocation={startLocation}
+            setStartLocation={setStartLocation}
+            generate={generate}
+            loading={loading}
+            error={error}
+          />
 
-            <input
-              type="number"
-              value={budget}
-              onChange={(e) => setBudget(Number(e.target.value))}
-            />
+          <section className="results-section">
+            <div className="results-inner">
+              {planResponse && (
+                <>
+                  <h2 className="section-title">✨ Your Personalized Hangout Plan</h2>
+                  <p className="section-subtitle">Based on your mood, budget, time & weather</p>
+                </>
+              )}
 
-            <select
-              value={timeAvailable}
-              onChange={(e) => setTimeAvailable(e.target.value)}
-            >
-              <option value="1-2 hours">1-2 hours</option>
-              <option value="2-4 hours">2-4 hours</option>
-              <option value="4-6 hours">4-6 hours</option>
-            </select>
-
-            <input
-              value={startLocation}
-              onChange={(e) => setStartLocation(e.target.value)}
-            />
-
-            <button onClick={generate}>Generate Plan</button>
-          </div>
-
-          {loading && <p>Generating plan…</p>}
-          {error && <p style={{ color: "red" }}>{error}</p>}
-
-          {planResponse && (
-            <>
-              <p>
-                🌦 Weather adapted for:{" "}
-                <b>{planResponse.weather_used}</b>
-              </p>
-
-              {planResponse.plan.optimized_plan.map((p, i) => (
-                <div key={i} style={styles.card}>
-                  <b>
-                    {p.place_name}
-                    {p.is_hidden_gem && " ⭐"}
-                  </b>
-                  <p>
-                    📍 {p.distance_km} km • ⏱️ {p.visit_time_hr} hr
-                  </p>
+              {loading && (
+                <div style={{ marginTop: 12 }}>
+                  <LoadingSpinner label="Generating plan" />
                 </div>
-              ))}
+              )}
 
-              {/* Feature-3: Shareable Plan */}
-              <button
-                onClick={() =>
-                  navigator.clipboard.writeText(planResponse.share_url)
-                }
-              >
-                📋 Copy Shareable Plan Link
-              </button>
-
-              {/* Feature-4: Smart Scheduling */}
-              <div style={styles.poll}>
-                <h3>📅 Pick a Time</h3>
-                {pollSlots.map((s, i) => (
-                  <div
-                    key={i}
-                    onClick={() => vote(i)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {s.label} 👍 {s.votes}
+              {error && (
+                <div style={{ marginTop: 12 }}>
+                  <div className="error">{error}</div>
+                  <div style={{ marginTop: 8 }}>
+                    <button className="cta ghost" onClick={generate}>Try Again</button>
                   </div>
-                ))}
-                <p>Best time: {bestSlot.label}</p>
-              </div>
-            </>
-          )}
-        </>
-      )}
-    </div>
+                </div>
+              )}
+
+              {planResponse && (
+                <div className="results-content" style={{ marginTop: 14 }}>
+                  <p className="muted">🌦 Weather adapted for: <b>{planResponse.weather_used}</b></p>
+
+                  {planResponse.plan.optimized_plan.map((p, i) => (
+                    <div key={i} className="plan-card">
+                      <div className="plan-card-header">
+                        <h3>
+                          {p.place_name}
+                          {p.is_hidden_gem && <span className="badge">Hidden Gem ⭐</span>}
+                        </h3>
+                      </div>
+
+                      <div className="plan-meta">
+                        <span>📍 {p.distance_km} km away</span>
+                        <span>⏱️ {p.visit_time_hr} hrs</span>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button className="form-control" onClick={() => navigator.clipboard.writeText(planResponse.share_url)}>📋 Copy Shareable Plan Link</button>
+
+                    <div style={{ minWidth: 220 }} className="poll">
+                      <h3 style={{ margin: 0, marginBottom: 8 }}>📅 Pick a Time</h3>
+                      {pollSlots.map((s, i) => (
+                        <div key={i} onClick={() => vote(i)} style={{ cursor: "pointer", padding: 6, borderRadius: 8 }}>
+                          {s.label} 👍 {s.votes}
+                        </div>
+                      ))}
+                      <p className="muted" style={{ marginTop: 8 }}>Best time: {bestSlot.label}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            </section>
+          </>
+        )}
+      </div>
+    </>
   );
 }
 
