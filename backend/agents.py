@@ -126,6 +126,25 @@ def agent_3_route_optimizer(
 
     return selected
 
+#------------AGENT 4 -------------
+SYSTEM_PROMPT_EDIT = """
+You are Agent-4.
+You convert user edit requests into JSON instructions.
+Output ONLY valid JSON.
+"""
+
+def agent_4_edit_interpreter(user_message: str) -> dict:
+    try:
+        model = genai.GenerativeModel(
+            model_name=MODEL_NAME,
+            system_instruction=SYSTEM_PROMPT_EDIT
+        )
+        res = model.generate_content(user_message)
+        return json.loads(res.text)
+    except:
+        return {}
+
+
 # ---------------- AGENT 5 ----------------
 
 def agent_5_plan_narrator(intent: Dict, optimized_plan: List[Dict]) -> str:

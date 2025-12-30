@@ -1,0 +1,77 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(8, 12, 24, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.header-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.logo span {
+  color: #2dd4bf;
+  margin-left: 4px;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+}
+
+.nav-btn.ghost {
+  background: transparent;
+  color: #cbd5f5;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.nav-btn.primary {
+  background: linear-gradient(90deg, #2dd4bf, #5eead4);
+  color: #041018;
+  font-weight: 600;
+}
+
+.how-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
+}
+
+.how-card:hover div:first-child {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 14px rgba(45, 212, 191, 0.6));
+}
+
+.testimonial-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.6);
+}
+
+footer a:hover {
+  color: #2dd4bf;
+}
+
+footer span:hover {
+  transform: scale(1.15);
+  opacity: 1;
+}
