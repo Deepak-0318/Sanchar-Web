@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
 export default function Hero() {
-  const navigate = useNavigate(); // ✅ initialize navigator
+  const navigate = useNavigate();
 
   return (
     <section style={styles.hero}>
@@ -15,16 +15,17 @@ export default function Hero() {
       </p>
 
       <div style={styles.actions}>
+        {/* ✅ FIXED: go to get-started */}
         <button
           style={styles.primaryBtn}
-          onClick={() => navigate("/planner")}   // ✅ route to planner
+          onClick={() => navigate("/get-started")}
         >
           Get Plan
         </button>
 
         <button
           style={styles.secondaryBtn}
-          onClick={() => navigate("/gems")}      // ✅ route to gems
+          onClick={() => navigate("/gems")}
         >
           Explore Gems
         </button>
