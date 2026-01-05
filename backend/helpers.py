@@ -12,6 +12,9 @@ MOOD_TAG_MAP = {
     "solo": ["solo"]
 }
 
+# -------------------------
+# REQUIRED BY agents.py
+# -------------------------
 def safe_list(val):
     if isinstance(val, list):
         return val
@@ -31,27 +34,26 @@ def vibe_match(row, vibe_keywords):
         expanded.extend(MOOD_TAG_MAP.get(v, [v]))
 
     tags_lower = [t.lower() for t in tags]
-
     return any(k in tags_lower or k in category for k in expanded)
 
+# -------------------------
+# DISTANCE
+# -------------------------
 def haversine(lat1, lon1, lat2, lon2):
     try:
-        lat1 = float(lat1)
-        lon1 = float(lon1)
-        lat2 = float(lat2)
-        lon2 = float(lon2)
-    except (TypeError, ValueError):
-        return float("inf")  # invalid distance → auto-rejected later
+        lat1, lon1, lat2, lon2 = map(float, [lat1, lon1, lat2, lon2])
+    except:
+        return float("inf")
 
     R = 6371
     dlat = radians(lat2 - lat1)
     dlon = radians(lon2 - lon1)
-
     a = sin(dlat / 2) ** 2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    return R * c
+    return R * 2 * atan2(sqrt(a), sqrt(1 - a))
 
-
+# -------------------------
+# VISIT TIME
+# -------------------------
 CATEGORY_TIME_MAP = {
     "food": 1.5,
     "cafe": 1.5,
@@ -65,12 +67,18 @@ CATEGORY_TIME_MAP = {
 def estimate_visit_time(category):
     return CATEGORY_TIME_MAP.get(category, 1.5)
 
+# -------------------------
+# DATA
+# -------------------------
 def load_places_data():
     base_dir = os.path.dirname(os.path.abspath(__file__))
     csv_path = os.path.join(base_dir, "data", "places_final_ai_ready.csv")
     df = pd.read_csv(csv_path)
     return df.to_dict(orient="records")
 
+# -------------------------
+# WEATHER
+# -------------------------
 def weather_score(row, current_weather):
     suitability = safe_list(row.get("weather_suitability", []))
     suitability = [s.lower() for s in suitability]
@@ -84,18 +92,40 @@ def weather_score(row, current_weather):
 
     return 0.4
 
-def geocode_place(place_name: str):
-    url = "https://nominatim.openstreetmap.org/search"
-    params = {
-        "q": place_name,
-        "format": "json",
-        "limit": 1
-    }
-
-    res = requests.get(url, params=params, headers={"User-Agent": "SancharAI"})
-    data = res.json()
-
-    if not data:
+# -------------------------
+# SAFE GEOCODING (NO CRASH)
+# -------------------------
+def geocode_place(place_name):
+    if not place_name or not isinstance(place_name, str):
         return None, None
 
-    return float(data[0]["lat"]), float(data[0]["lon"])
+    # Bangalore fallback (VERY IMPORTANT)
+    fallback_map = {
+        "mg road": (12.9758, 77.6033),
+        "mg road bangalore": (12.9758, 77.6033)
+    }
+
+    key = place_name.lower().strip()
+    if key in fallback_map:
+        return fallback_map[key]
+
+    try:
+        res = requests.get(
+            "https://nominatim.openstreetmap.org/search",
+            params={"q": place_name, "format": "json", "limit": 1},
+            headers={"User-Agent": "SancharAI/1.0"},
+            timeout=10
+        )
+
+        if res.status_code != 200:
+            return None, None
+
+        data = res.json()
+        if not data:
+            return None, None
+
+        return float(data[0]["lat"]), float(data[0]["lon"])
+
+    except Exception as e:
+        print("Geocoding failed:", e)
+        return None, None

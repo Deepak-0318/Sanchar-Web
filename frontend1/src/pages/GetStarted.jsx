@@ -32,13 +32,20 @@ const questions = [
       { label: "1–2 hours", value: "1-2", emoji: "⏱️" },
       { label: "2–4 hours", value: "2-4", emoji: "⌛" },
       { label: "Half day", value: "half-day", emoji: "🌤️" },
+      { label: "Full day", value: "full-day", emoji: "🌞" },
     ],
   },
   {
-    key: "location",
+    key: "start_location",
     type: "input",
     title: "Where are you starting from?",
     placeholder: "Eg: Indiranagar, Bengaluru",
+  },
+  {
+    key: "preferred_location",
+    type: "input",
+    title: "Where do you want to go?",
+    placeholder: "Eg: MG Road, Bengaluru",
   },
 ];
 
@@ -55,22 +62,25 @@ export default function GetStarted() {
     const updated = { ...answers, [current.key]: value };
     setAnswers(updated);
 
-    // FINAL STEP
-    if (current.key === "location") {
+    // FINAL STEP → GEO-CODE START LOCATION & NAVIGATE
+    if (current.key === "preferred_location") {
       setLoading(true);
       try {
-        const coords = await geocodeLocation(value);
+        const coords = await geocodeLocation(updated.start_location);
 
         navigate("/planner", {
           state: {
-            intent: updated,
+            mood: updated.mood,
+            budget: updated.budget,
+            time: updated.time,
+            startLocation: updated.start_location,
+            preferredLocation: updated.preferred_location,
             start_lat: coords.lat,
             start_lon: coords.lon,
           },
         });
       } catch (err) {
-        console.error("Geocode failed:", err);
-        alert("Could not find location. Try nearby area.");
+        alert("Could not find starting location. Try nearby area.");
       } finally {
         setLoading(false);
       }
@@ -117,7 +127,7 @@ export default function GetStarted() {
             disabled={!inputValue.trim() || loading}
             onClick={() => handleNext(inputValue)}
           >
-            {loading ? "Finding location…" : "Get Plan →"}
+            {loading ? "Processing…" : "Continue →"}
           </button>
         </div>
       )}

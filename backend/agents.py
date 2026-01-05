@@ -5,27 +5,32 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 from helpers import vibe_match, haversine, estimate_visit_time, weather_score
 
+# -------------------------------------------------
+# CONFIG
+# -------------------------------------------------
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 MODEL_NAME = "models/gemini-flash-latest"
 
 SYSTEM_PROMPT_NARRATOR = "Explain the plan clearly and briefly."
 
-
-# ---------------- AGENT 1: INTENT ----------------
+# -------------------------------------------------
+# AGENT 1: INTENT PARSER
+# -------------------------------------------------
 
 def agent_1_intent_builder(user_input: Dict) -> Dict:
     msg = user_input.get("message", "").lower()
 
     intent = {
+        "start_location": None,
+        "preferred_location": None,
         "vibe": ["chill"],
-        "budget_min": 0,
-        "budget_max": 1000,
+        "budget_tier": "moderate",
         "time_available_hours": 3.0,
         "weather": "clear"
     }
 
-    # ---------------- VIBE ----------------
+    # ---------- VIBE ----------
     if "romantic" in msg:
         intent["vibe"] = ["romantic"]
     elif "fun" in msg or "lively" in msg:
@@ -33,44 +38,44 @@ def agent_1_intent_builder(user_input: Dict) -> Dict:
     elif "relaxed" in msg or "calm" in msg:
         intent["vibe"] = ["chill"]
 
-    # ---------------- BUDGET ----------------
+    # ---------- BUDGET ----------
     if "premium" in msg or "luxury" in msg or "fine dining" in msg:
         intent["budget_tier"] = "premium"
+    elif "budget" in msg or "cheap" in msg:
+        intent["budget_tier"] = "budget"
 
-    # ---------------- TIME ----------------
-    if "half day" in msg:
+    # ---------- TIME ----------
+    if "full day" in msg or "entire day" in msg:
+        intent["time_available_hours"] = 8.0
+    elif "half day" in msg:
         intent["time_available_hours"] = 4.5
     elif "1-2" in msg or "1 to 2" in msg:
         intent["time_available_hours"] = 1.5
     elif "2-4" in msg or "2 to 4" in msg:
         intent["time_available_hours"] = 3.0
 
-    # ---------------- LOCATION (CANONICAL) ----------------
-    # Bengaluru core
+    # ---------- LOCATION NORMALIZATION ----------
     if "rr nagar" in msg or "rajarajeshwari" in msg:
-        intent["location"] = "RR Nagar, Bengaluru"
+        intent["preferred_location"] = "RR Nagar, Bengaluru"
 
     elif "mg road" in msg:
-        intent["location"] = "MG Road, Bengaluru"
+        intent["preferred_location"] = "MG Road, Bengaluru"
 
     elif "whitefield" in msg:
-        intent["location"] = "Whitefield, Bengaluru"
+        intent["preferred_location"] = "Whitefield, Bengaluru"
 
-    # Bengaluru South / Ramanagara normalization
     elif any(k in msg for k in [
-        "ramanagara",
-        "ramnagara",
-        "bengaluru south",
-        "kanakapura",
-        "channapatna",
-        "magadi"
+        "ramanagara", "ramnagara", "bengaluru south",
+        "kanakapura", "channapatna", "magadi"
     ]):
-        intent["location"] = "Ramanagara, Bengaluru South"
+        intent["preferred_location"] = "Ramanagara, Bengaluru"
 
     return intent
 
 
-# ---------------- AGENT 2: SCORING ----------------
+# -------------------------------------------------
+# AGENT 2: SCORING
+# -------------------------------------------------
 
 def agent_2_dataset_filter(df: pd.DataFrame, intent: Dict) -> pd.DataFrame:
     scored = []
@@ -92,7 +97,9 @@ def agent_2_dataset_filter(df: pd.DataFrame, intent: Dict) -> pd.DataFrame:
     )
 
 
-# ---------------- AGENT 3: ROUTE ----------------
+# -------------------------------------------------
+# AGENT 3: ROUTE OPTIMIZER
+# -------------------------------------------------
 
 def agent_3_route_optimizer(df, lat, lon, time_limit):
     selected = []
@@ -102,7 +109,7 @@ def agent_3_route_optimizer(df, lat, lon, time_limit):
     for _, r in df.iterrows():
         dist = haversine(cur_lat, cur_lon, r["latitude"], r["longitude"])
         visit = estimate_visit_time(r["category"])
-        travel = dist / 20  # avg 20km/h
+        travel = dist / 20  # avg speed
 
         if remaining >= visit + travel:
             selected.append({
@@ -114,14 +121,28 @@ def agent_3_route_optimizer(df, lat, lon, time_limit):
             })
             remaining -= (visit + travel)
             cur_lat, cur_lon = r["latitude"], r["longitude"]
-
-        if len(selected) == 3:
+        
+        max_places = 5 if time_limit >= 7 else 3
+        if len(selected) >= max_places:
             break
 
     return selected
 
 
-# ---------------- AGENT 5: NARRATION ----------------
+# -------------------------------------------------
+# AGENT 4: EDIT (SAFE STUB)
+# -------------------------------------------------
+
+def agent_4_edit_interpreter(message: str) -> dict:
+    return {}
+
+def apply_edit_instruction(plan: List[Dict], instruction: Dict) -> List[Dict]:
+    return plan
+
+
+# -------------------------------------------------
+# AGENT 5: NARRATION
+# -------------------------------------------------
 
 def agent_5_plan_narrator(intent: Dict, plan: List[Dict]) -> str:
     if not plan:
@@ -137,23 +158,3 @@ def agent_5_plan_narrator(intent: Dict, plan: List[Dict]) -> str:
     except:
         names = ", ".join(p["place_name"] for p in plan)
         return f"We’ve created a balanced plan featuring {names}."
-
-# ---------------- AGENT 4: EDIT INTERPRETER (STUB) ----------------
-
-def agent_4_edit_interpreter(message: str) -> dict:
-    """
-    Placeholder for future conversational edits
-    (remove place, swap place, etc.)
-    """
-    return {}
-
-# ---------------- AGENT 4 HELPERS ----------------
-
-def apply_edit_instruction(plan: List[Dict], instruction: Dict) -> List[Dict]:
-    """
-    Placeholder for future edit operations like:
-    - remove place
-    - swap place
-    - add place
-    """
-    return plan
