@@ -9,7 +9,6 @@ from pipeline import generate_hangout_plan
 from agents import agent_1_intent_builder
 from store import create_session, get_session, update_session
 from enhanced_pipeline import enhanced_pipeline
-from intelligent_pipeline import initialize_intelligent_pipeline, intelligent_pipeline
 import os
 from dotenv import load_dotenv
 
@@ -30,16 +29,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Initialize intelligent pipeline
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-if DEEPSEEK_API_KEY:
-    try:
-        initialize_intelligent_pipeline(DEEPSEEK_API_KEY)
-        print("✅ Intelligent Pipeline initialized with DeepSeek API")
-    except Exception as e:
-        print(f"⚠️ Failed to initialize Intelligent Pipeline: {e}")
-else:
-    print("⚠️ DEEPSEEK_API_KEY not found. Intelligent features disabled.")
+# Enhanced RAG Pipeline with Groq is the primary approach
+print("✅ Enhanced RAG Pipeline (Groq) initialized")
 
 # In-memory storage for share tokens
 share_tokens = {}
@@ -53,8 +44,7 @@ class ChatRequest(BaseModel):
     message: str
     preferred_location: Optional[str] = None
     weather: Optional[str] = None
-    use_enhanced_rag: Optional[bool] = True  # Flag to use enhanced RAG
-    use_intelligent_chat: Optional[bool] = False  # Disabled by default - use enhanced RAG with Groq
+    use_enhanced_rag: Optional[bool] = True  # Flag to use enhanced RAG with Groq
     use_current_location: Optional[bool] = False  # Flag for Nearby button
 
 @app.post("/chat/start")
@@ -78,12 +68,8 @@ def chat(req: ChatRequest):
         if not state:
             return {"narration": "Session expired. Please refresh and try again.", "optimized_plan": []}
 
-        # Use Intelligent Chat Pipeline (DeepSeek + Embeddings)
-        if req.use_intelligent_chat and intelligent_pipeline:
-            return handle_intelligent_chat(req, state)
-        
-        # Use Enhanced RAG Pipeline
-        elif req.use_enhanced_rag:
+        # Use Enhanced RAG Pipeline (Groq)
+        if req.use_enhanced_rag:
             return handle_enhanced_rag_chat(req, state)
         
         # Fallback to original pipeline
@@ -94,78 +80,7 @@ def chat(req: ChatRequest):
         print(f"Chat error: {e}")
         return {"narration": f"Error: {str(e)}", "optimized_plan": []}
 
-def handle_intelligent_chat(req: ChatRequest, state: dict) -> dict:
-    """Handle chat using intelligent pipeline with DeepSeek + Embeddings"""
-    try:
-        result = intelligent_pipeline.process_user_message(
-            session_id=req.session_id,
-            user_message=req.message,
-            user_lat=state["start_lat"],
-            user_lon=state["start_lon"]
-        )
-        
-        # Store intelligent state
-        state["intelligent_result"] = result
-        update_session(req.session_id, state)
-        
-        # Format response based on result type
-        if result["type"] == "follow_up_question":
-            return {
-                "narration": result["message"],
-                "optimized_plan": [],
-                "chat_type": "follow_up",
-                "interests": result["interests"],
-                "confidence": result["confidence"]
-            }
-        
-        elif result["type"] == "negation_response":
-            return {
-                "narration": result["message"],
-                "optimized_plan": [],
-                "chat_type": "negation",
-                "negation_count": result.get("negation_count", 0)
-            }
-        
-        elif result["type"] in ["recommendations", "refined_recommendations"]:
-            # Format recommendations for frontend compatibility
-            formatted_recommendations = []
-            for rec in result["recommendations"]:
-                formatted_recommendations.append({
-                    "place_id": rec["place_id"],
-                    "place_name": rec["place_name"],
-                    "category": rec["category"],
-                    "distance_km": rec["distance_km"],
-                    "visit_time_hr": rec["visit_time_hr"],
-                    "budget_range": rec["budget_range"],
-                    "famous_for": rec["famous_for"],
-                    "area": rec["area"],
-                    "similarity_score": rec["similarity_score"],
-                    "vibe": rec["vibe"]
-                })
-            
-            return {
-                "narration": result["message"],
-                "optimized_plan": formatted_recommendations,
-                "chat_type": "recommendations",
-                "interests": result["interests"],
-                "confidence": result["confidence"],
-                "search_info": result.get("search_info", {})
-            }
-        
-        else:
-            return {
-                "narration": result.get("message", "I'm processing your request..."),
-                "optimized_plan": [],
-                "chat_type": "processing"
-            }
-            
-    except Exception as e:
-        print(f"Intelligent chat error: {e}")
-        return {
-            "narration": "I'm having trouble understanding. Could you tell me what kind of place you're looking for?",
-            "optimized_plan": [],
-            "chat_type": "error"
-        }
+
 
 def handle_enhanced_rag_chat(req: ChatRequest, state: dict) -> dict:
     """Handle chat using enhanced RAG pipeline"""
@@ -418,82 +333,13 @@ def update_search_radius(session_id: str, radius_km: float):
         }
     
     return {"message": "Radius updated", "radius_km": radius_km}
-@app.post("/chat/refine/{session_id}")
-def refine_search(session_id: str, refinement_message: str):
-    """Refine search based on user feedback"""
-    if not intelligent_pipeline:
-        raise HTTPException(status_code=503, detail="Intelligent pipeline not available")
-    
-    try:
-        result = intelligent_pipeline.refine_search(session_id, refinement_message)
-        
-        if "error" in result:
-            raise HTTPException(status_code=404, detail=result["error"])
-        
-        # Format for frontend
-        formatted_recommendations = []
-        for rec in result["recommendations"]:
-            formatted_recommendations.append({
-                "place_id": rec["place_id"],
-                "place_name": rec["place_name"],
-                "category": rec["category"],
-                "distance_km": rec["distance_km"],
-                "visit_time_hr": rec["visit_time_hr"],
-                "budget_range": rec["budget_range"],
-                "famous_for": rec["famous_for"],
-                "similarity_score": rec["similarity_score"]
-            })
-        
-        return {
-            "narration": result["message"],
-            "optimized_plan": formatted_recommendations,
-            "interests": result["interests"],
-            "search_info": result["search_info"]
-        }
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/chat/conversation/{session_id}")
-def get_conversation_summary(session_id: str):
-    """Get conversation summary for a session"""
-    if not intelligent_pipeline:
-        return {"error": "Intelligent pipeline not available"}
-    
-    return intelligent_pipeline.get_conversation_summary(session_id)
-
-@app.delete("/chat/conversation/{session_id}")
-def reset_conversation(session_id: str):
-    """Reset conversation for a session"""
-    if intelligent_pipeline:
-        intelligent_pipeline.reset_conversation(session_id)
-    
-    return {"message": "Conversation reset successfully"}
-
 @app.get("/system/stats")
 def get_system_stats():
     """Get system statistics"""
-    stats = {
+    return {
         "enhanced_pipeline": "available",
-        "intelligent_pipeline": "available" if intelligent_pipeline else "not_available"
+        "pipeline": "groq_rag"
     }
-    
-    if intelligent_pipeline:
-        stats.update(intelligent_pipeline.get_system_stats())
-    
-    return stats
-
-@app.post("/system/initialize")
-def initialize_system():
-    """Initialize or reinitialize the system"""
-    try:
-        if intelligent_pipeline:
-            intelligent_pipeline.initialize_system()
-            return {"message": "System initialized successfully"}
-        else:
-            return {"error": "Intelligent pipeline not available"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/share/generate")
 def generate_share_token(req: dict):
@@ -524,14 +370,3 @@ def get_shared_plan(token: str):
     
     return token_data["data"]
 
-@app.get("/embeddings/search")
-def search_embeddings(query: str, limit: int = 5):
-    """Direct embedding search for testing"""
-    if not intelligent_pipeline:
-        raise HTTPException(status_code=503, detail="Intelligent pipeline not available")
-    
-    try:
-        results = intelligent_pipeline.embedding_system.search_by_text(query, limit)
-        return {"query": query, "results": results}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))

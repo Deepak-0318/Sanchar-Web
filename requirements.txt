@@ -6,13 +6,6 @@ python-dotenv
 google-generativeai
 requests
 pydantic
-sentence-transformers
-chromadb
-numpy
-torch
-transformers
-pyngrok
-vite
 
 # Frontend Dependencies (Node.js/npm)
 # Install using: npm install
